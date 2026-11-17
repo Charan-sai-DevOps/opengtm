@@ -1842,7 +1842,7 @@ td span {
   align-items: center;
   justify-content: space-between;
 }
-.integration-title > span {
+.integration-title > span:first-child {
   display: grid;
   place-items: center;
   width: 38px;

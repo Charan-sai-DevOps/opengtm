@@ -1671,9 +1671,17 @@ function Integrations({ toast }: { toast: (s: string) => void }) {
   );
 }
 
-function SettingsPage({ activeChild, toast }: { activeChild: string; toast: (s: string) => void }) {
+function SettingsPage({
+  activeChild,
+  onTabChange,
+  toast,
+}: {
+  activeChild: string;
+  onTabChange: (tab: string) => void;
+  toast: (s: string) => void;
+}) {
   const tabs = ["My Profile", "Preferences", "API Keys", "Usage & Limits", "Security"];
-  const [tab, setTab] = useState(tabs.includes(activeChild) ? activeChild : "My Profile");
+  const tab = tabs.includes(activeChild) ? activeChild : "My Profile";
   return (
     <>
       <PageHeader
@@ -1683,7 +1691,7 @@ function SettingsPage({ activeChild, toast }: { activeChild: string; toast: (s: 
       <div className="settings-layout">
         <aside>
           {tabs.map((t) => (
-            <button className={tab === t ? "active" : ""} onClick={() => setTab(t)} key={t}>
+            <button className={tab === t ? "active" : ""} onClick={() => onTabChange(t)} key={t}>
               {t === "My Profile" ? (
                 <Users size={16} />
               ) : t === "Security" ? (
@@ -1929,7 +1937,13 @@ export default function App() {
       case "integrations":
         return <Integrations toast={toast} />;
       case "settings":
-        return <SettingsPage activeChild={activeChild} toast={toast} />;
+        return (
+          <SettingsPage
+            activeChild={activeChild}
+            onTabChange={(child) => navigate("settings", child)}
+            toast={toast}
+          />
+        );
     }
   };
   return (

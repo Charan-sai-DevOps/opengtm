@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   Activity,
   ArrowDown,
@@ -2061,6 +2062,7 @@ export default function App() {
           </button>
         </div>
       )}
+      <SpeedInsights />
     </div>
   );
 }

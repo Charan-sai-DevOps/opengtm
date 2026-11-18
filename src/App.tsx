@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   Activity,
@@ -2144,6 +2145,7 @@ export default function App() {
           </button>
         </div>
       )}
+      <Analytics />
       <SpeedInsights />
     </div>
   );

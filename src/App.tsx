@@ -141,7 +141,7 @@ const navGroups: NavGroup[] = [
     id: "settings",
     label: "Settings",
     icon: Settings,
-    children: ["My Profile", "API Keys", "Usage & Limits", "Security", "Preferences"],
+    children: ["My Profile", "Preferences", "API Keys", "Usage & Limits", "Security"],
   },
 ];
 
@@ -1019,9 +1019,7 @@ function Qualification() {
   );
 }
 
-function Outreach({ toast }: { toast: (s: string) => void }) {
-  const [tab, setTab] = useState("Message Generator");
-  const tabs = ["Message Generator", "Message Templates", "Follow-up Sequences", "Outreach Queue"];
+function Outreach({ toast, activeChild }: { toast: (s: string) => void; activeChild: string }) {
   return (
     <>
       <PageHeader
@@ -1029,14 +1027,7 @@ function Outreach({ toast }: { toast: (s: string) => void }) {
         subtitle="Create relevant, personalized messages and organize your outreach workflow."
         action={<Badge tone="warning">Sending integration not connected</Badge>}
       />
-      <div className="tabs">
-        {tabs.map((t) => (
-          <button className={tab === t ? "active" : ""} onClick={() => setTab(t)} key={t}>
-            {t}
-          </button>
-        ))}
-      </div>
-      {tab === "Message Generator" && (
+      {activeChild === "Message Generator" && (
         <div className="outreach-grid">
           <Card>
             <div className="card-head">
@@ -1128,7 +1119,7 @@ function Outreach({ toast }: { toast: (s: string) => void }) {
           </Card>
         </div>
       )}
-      {tab === "Message Templates" && (
+      {activeChild === "Message Templates" && (
         <div className="template-grid">
           {[
             "LinkedIn connection",
@@ -1152,8 +1143,8 @@ function Outreach({ toast }: { toast: (s: string) => void }) {
           ))}
         </div>
       )}
-      {tab === "Follow-up Sequences" && (
-        <Card>
+      {activeChild === "Follow-up Sequences" && (
+        <Card className="sequence-card">
           <div className="card-head">
             <div>
               <h2>Four-touch growth sequence</h2>
@@ -1188,7 +1179,7 @@ function Outreach({ toast }: { toast: (s: string) => void }) {
           </div>
         </Card>
       )}
-      {tab === "Outreach Queue" && (
+      {activeChild === "Outreach Queue" && (
         <Card className="empty-state">
           <span>
             <Send size={22} />
@@ -1207,6 +1198,14 @@ function Outreach({ toast }: { toast: (s: string) => void }) {
 
 function Seo({ toast }: { toast: (s: string) => void }) {
   const [url, setUrl] = useState("https://opengtm.app");
+  const tabs = [
+    "Overview",
+    "Technical SEO",
+    "AI Search Readiness",
+    "Issue Management",
+    "Audit History",
+  ] as const;
+  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Overview");
   const checks = [
     ["Page titles", "Passed", "Unique titles found on all key pages"],
     ["Meta descriptions", "Warning", "4 descriptions exceed 160 characters"],
@@ -1215,6 +1214,44 @@ function Seo({ toast }: { toast: (s: string) => void }) {
     ["Organization schema", "Critical", "Organization structured data is missing"],
     ["FAQ schema", "Warning", "FAQ content exists without schema markup"],
   ];
+  const technicalChecks = checks.slice(0, 3);
+  const readinessChecks = checks.slice(3);
+  const issues = checks.filter(([, status]) => status !== "Passed");
+  const renderCheckCard = (
+    title: string,
+    description: string,
+    rows: typeof checks,
+    badge: string,
+    tone: "success" | "warning" | "danger",
+  ) => (
+    <Card>
+      <div className="card-head">
+        <div>
+          <h2>{title}</h2>
+          <p>{description}</p>
+        </div>
+        <Badge tone={tone}>{badge}</Badge>
+      </div>
+      {rows.map(([name, status, detail]) => (
+        <div className="check-row" key={name}>
+          <span className={status.toLowerCase()}>
+            {status === "Passed" ? (
+              <Check size={14} />
+            ) : status === "Critical" ? (
+              <X size={14} />
+            ) : (
+              "!"
+            )}
+          </span>
+          <div>
+            <strong>{name}</strong>
+            <p>{detail}</p>
+          </div>
+          <ChevronRight size={15} />
+        </div>
+      ))}
+    </Card>
+  );
   return (
     <>
       <PageHeader
@@ -1252,68 +1289,97 @@ function Seo({ toast }: { toast: (s: string) => void }) {
           </Card>
         ))}
       </div>
-      <div className="tabs">
-        <button className="active">Overview</button>
-        <button>Technical SEO</button>
-        <button>AI Search Readiness</button>
-        <button>Issue Management</button>
-        <button>Audit History</button>
+      <div className="tabs" role="tablist" aria-label="Website audit views">
+        {tabs.map((tab, index) => (
+          <button
+            key={tab}
+            id={`seo-tab-${index}`}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            aria-controls="seo-tab-panel"
+            className={activeTab === tab ? "active" : ""}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
-      <div className="two-col audit-results">
-        <Card>
-          <div className="card-head">
-            <div>
-              <h2>Technical SEO</h2>
-              <p>Core website health checks</p>
-            </div>
-            <Badge tone="success">7 passed</Badge>
+      <div
+        id="seo-tab-panel"
+        className="seo-tab-panel"
+        role="tabpanel"
+        aria-labelledby={`seo-tab-${tabs.indexOf(activeTab)}`}
+      >
+        {activeTab === "Overview" && (
+          <div className="two-col audit-results">
+            {renderCheckCard(
+              "Technical SEO",
+              "Core website health checks",
+              technicalChecks,
+              "7 passed",
+              "success",
+            )}
+            {renderCheckCard(
+              "AI search readiness",
+              "Visibility for AI answer engines",
+              readinessChecks,
+              "2 issues",
+              "warning",
+            )}
           </div>
-          {checks.slice(0, 3).map(([n, status, detail]) => (
-            <div className="check-row" key={n}>
-              <span className={status.toLowerCase()}>
-                {status === "Passed" ? (
-                  <Check size={14} />
-                ) : status === "Critical" ? (
-                  <X size={14} />
-                ) : (
-                  "!"
-                )}
-              </span>
+        )}
+        {activeTab === "Technical SEO" &&
+          renderCheckCard(
+            "Technical SEO",
+            "Core website health checks",
+            technicalChecks,
+            `${technicalChecks.filter(([, status]) => status === "Passed").length} passed`,
+            "success",
+          )}
+        {activeTab === "AI Search Readiness" &&
+          renderCheckCard(
+            "AI search readiness",
+            "Visibility for AI answer engines",
+            readinessChecks,
+            `${readinessChecks.filter(([, status]) => status !== "Passed").length} issues`,
+            "warning",
+          )}
+        {activeTab === "Issue Management" &&
+          renderCheckCard(
+            "Open issues",
+            "Warnings and critical items requiring attention",
+            issues,
+            `${issues.length} issues`,
+            "danger",
+          )}
+        {activeTab === "Audit History" && (
+          <Card>
+            <div className="card-head">
               <div>
-                <strong>{n}</strong>
-                <p>{detail}</p>
+                <h2>Recent audits</h2>
+                <p>Previous scans for {url}</p>
               </div>
-              <ChevronRight size={15} />
+              <Badge tone="neutral">3 audits</Badge>
             </div>
-          ))}
-        </Card>
-        <Card>
-          <div className="card-head">
-            <div>
-              <h2>AI search readiness</h2>
-              <p>Visibility for AI answer engines</p>
-            </div>
-            <Badge tone="warning">2 issues</Badge>
-          </div>
-          {checks.slice(3).map(([n, status, detail]) => (
-            <div className="check-row" key={n}>
-              <span className={status.toLowerCase()}>
-                {status === "Passed" ? (
+            {[
+              ["May 30, 2025", "86"],
+              ["May 23, 2025", "82"],
+              ["May 16, 2025", "78"],
+            ].map(([date, score]) => (
+              <div className="check-row" key={date}>
+                <span className="passed">
                   <Check size={14} />
-                ) : status === "Critical" ? (
-                  <X size={14} />
-                ) : (
-                  "!"
-                )}
-              </span>
-              <div>
-                <strong>{n}</strong>
-                <p>{detail}</p>
+                </span>
+                <div>
+                  <strong>Website audit completed</strong>
+                  <p>{date}</p>
+                </div>
+                <Badge tone="success">{score}/100</Badge>
               </div>
-              <ChevronRight size={15} />
-            </div>
-          ))}
-        </Card>
+            ))}
+          </Card>
+        )}
       </div>
     </>
   );
@@ -1915,7 +1981,7 @@ export default function App() {
     activeChild === primaryChildren[section] ||
     (section === "qualification" && activeChild === "Qualified Leads");
   const render = () => {
-    if (!showPrimary && section !== "settings")
+    if (!showPrimary && section !== "settings" && section !== "outreach")
       return <GenericSubPage section={section} child={activeChild} />;
     switch (section) {
       case "dashboard":
@@ -1927,7 +1993,7 @@ export default function App() {
       case "qualification":
         return <Qualification />;
       case "outreach":
-        return <Outreach toast={toast} />;
+        return <Outreach toast={toast} activeChild={activeChild} />;
       case "seo":
         return <Seo toast={toast} />;
       case "keywords":
@@ -2065,7 +2131,9 @@ export default function App() {
             <span className="avatar">AM</span>
           </div>
         </header>
-        <main className={section === "assistant" ? "assistant-page" : ""}>{render()}</main>
+        <main className={section === "assistant" && showPrimary ? "assistant-page" : ""}>
+          {render()}
+        </main>
       </div>
       {toastMsg && (
         <div className="toast">

@@ -1505,8 +1505,11 @@ td span {
   color: #8a948f;
   font-size: 8px;
 }
-.sequence {
-  margin-top: 18px;
+.sequence-card > .card-head {
+  padding: 16px;
+}
+.sequence-card .sequence {
+  margin-top: 0;
 }
 .sequence > div {
   display: flex;
@@ -1515,7 +1518,7 @@ td span {
   padding: 12px;
   border-top: 1px solid var(--border);
 }
-.sequence > div > span {
+.sequence > div > span:first-child {
   display: grid;
   place-items: center;
   width: 26px;
@@ -1606,7 +1609,7 @@ td span {
   border: 1px solid var(--border);
   border-radius: 7px;
 }
-.audit-input svg {
+.audit-input > div > svg {
   color: var(--muted);
 }
 .audit-input input {
@@ -1643,6 +1646,10 @@ td span {
 .audit-results {
   margin-top: 0;
 }
+.seo-tab-panel > .card,
+.seo-tab-panel .audit-results > .card {
+  padding: 17px;
+}
 .check-row {
   display: flex;
   align-items: center;
@@ -1653,7 +1660,7 @@ td span {
 .check-row:first-of-type {
   margin-top: 14px;
 }
-.check-row > span {
+.check-row > span:first-child {
   display: grid;
   place-items: center;
   width: 23px;
@@ -1988,7 +1995,7 @@ td span {
   color: var(--muted);
   font-size: 9px;
 }
-.key-row > span {
+.key-row > span:first-child {
   display: grid;
   place-items: center;
   width: 34px;
